@@ -1,113 +1,3 @@
-# import os
-# import numpy as np
-# import tensorflow as tf
-# from PIL import Image
-# from flask import Flask, render_template, request, redirect, url_for
-# from werkzeug.utils import secure_filename
-
-# # Inisialisasi aplikasi Flask
-# app = Flask(__name__)
-
-# # Konfigurasi folder untuk menyimpan file upload
-# UPLOAD_FOLDER = 'static/uploads/'
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# # Muat model TFLite
-# try:
-#     interpreter = tf.lite.Interpreter(model_path="model.tflite")
-#     interpreter.allocate_tensors()
-#     print("✅ Model TFLite berhasil dimuat.")
-# except Exception as e:
-#     print(f"❌ Gagal memuat model: {e}")
-#     interpreter = None
-
-# input_details = interpreter.get_input_details()
-# output_details = interpreter.get_output_details()
-# input_shape = input_details[0]['shape']
-
-# # Definisikan nama kelas (singkatan) sesuai urutan pelatihan
-# CLASS_NAMES = ['akiec', 'bcc', 'bkl', 'df', 'mel', 'nv', 'vasc']
-
-# # **BARU**: Buat kamus untuk nama lengkap penyakit
-# FULL_CLASS_NAMES = {
-#     'nv': 'Melanocytic nevi',
-#     'mel': 'Melanoma',
-#     'bkl': 'Benign keratosis-like lesions',
-#     'bcc': 'Basal cell carcinoma',
-#     'akiec': 'Actinic keratoses',
-#     'vasc': 'Vascular lesions',
-#     'df': 'Dermatofibroma'
-# }
-
-# def allowed_file(filename):
-#     return '.' in filename and \
-#            filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
-
-# def predict_image(image_path):
-#     if interpreter is None:
-#         return None
-
-#     img = Image.open(image_path).resize((224, 224))
-#     img_array = np.array(img, dtype=np.float32)
-#     img_array = np.expand_dims(img_array, axis=0)
-#     img_array /= 255.0
-
-#     interpreter.set_tensor(input_details[0]['index'], img_array)
-#     interpreter.invoke()
-#     output_data = interpreter.get_tensor(output_details[0]['index'])
-#     prediction = output_data[0]
-    
-#     all_predictions = {CLASS_NAMES[i]: float(prediction[i]) for i in range(len(CLASS_NAMES))}
-#     return all_predictions
-
-# @app.route('/', methods=['GET', 'POST'])
-# def upload_and_predict():
-#     if request.method == 'POST':
-#         if 'file' not in request.files:
-#             return redirect(request.url)
-        
-#         file = request.files['file']
-        
-#         if file.filename == '' or not allowed_file(file.filename):
-#             return redirect(request.url)
-            
-#         filename = secure_filename(file.filename)
-#         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#         file.save(filepath)
-        
-#         all_predictions = predict_image(filepath)
-        
-#         if all_predictions:
-#             # Cari singkatan prediksi teratas
-#             top_label_short = max(all_predictions, key=all_predictions.get)
-#             # Dapatkan nama lengkapnya dari kamus
-#             top_label_full = FULL_CLASS_NAMES.get(top_label_short, "Tidak Diketahui")
-#             top_confidence = all_predictions[top_label_short]
-            
-#             # **DIUBAH**: Gunakan nama lengkap saat memformat semua prediksi
-#             formatted_predictions = {
-#                 FULL_CLASS_NAMES.get(label, label): f"{score * 100:.2f}%" 
-#                 for label, score in sorted(all_predictions.items(), key=lambda item: item[1], reverse=True)
-#             }
-#         else:
-#             top_label_full = "Error"
-#             top_confidence = 0
-#             formatted_predictions = {}
-        
-#         return render_template(
-#             'index.html', 
-#             filename=filename, 
-#             top_label=top_label_full, # Kirim nama lengkap
-#             top_confidence=f"{top_confidence * 100:.2f}",
-#             all_predictions=formatted_predictions
-#         )
-
-#     return render_template('index.html', filename=None)
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
 import os
 import numpy as np
 import tensorflow as tf
@@ -115,15 +5,12 @@ from PIL import Image
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 
-# Inisialisasi aplikasi Flask
 app = Flask(__name__)
 
-# Konfigurasi folder untuk menyimpan file upload
 UPLOAD_FOLDER = 'static/uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Muat model TFLite
 try:
     interpreter = tf.lite.Interpreter(model_path="model.tflite")
     interpreter.allocate_tensors()
@@ -136,10 +23,8 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 input_shape = input_details[0]['shape']
 
-# Definisikan nama kelas (singkatan) sesuai urutan pelatihan
 CLASS_NAMES = ['akiec', 'bcc', 'bkl', 'df', 'mel', 'nv', 'vasc']
 
-# Buat kamus untuk nama lengkap penyakit
 FULL_CLASS_NAMES = {
     'nv': 'Melanocytic nevi',
     'mel': 'Melanoma',
@@ -150,7 +35,6 @@ FULL_CLASS_NAMES = {
     'df': 'Dermatofibroma'
 }
 
-# **BARU**: Kamus untuk rekomendasi perawatan
 RECOMMENDATIONS = {
     'nv': """
         <strong>Status:</strong> Umumnya jinak (tahi lalat biasa).
@@ -232,13 +116,10 @@ def upload_and_predict():
         all_predictions = predict_image(filepath)
         
         if all_predictions:
-            # Cari singkatan prediksi teratas
             top_label_short = max(all_predictions, key=all_predictions.get)
-            # Dapatkan nama lengkapnya dari kamus
             top_label_full = FULL_CLASS_NAMES.get(top_label_short, "Tidak Diketahui")
             top_confidence = all_predictions[top_label_short]
             
-            # **BARU**: Dapatkan rekomendasi berdasarkan label singkatan
             recommendation = RECOMMENDATIONS.get(top_label_short, RECOMMENDATIONS['default'])
 
         else:
@@ -249,9 +130,9 @@ def upload_and_predict():
         return render_template(
             'index.html', 
             filename=filename, 
-            top_label=top_label_full, # Kirim nama lengkap
+            top_label=top_label_full, 
             top_confidence=f"{top_confidence * 100:.2f}",
-            recommendation=recommendation # **DIUBAH**: Kirim rekomendasi, bukan all_predictions
+            recommendation=recommendation
         )
 
     return render_template('index.html', filename=None)
