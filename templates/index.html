@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasifikasi Penyakit Kulit</title>
+    <style>
+        /* Gaya Global */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        /* Wrapper untuk dua kolom */
+        .main-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        /* Gaya "Kartu" untuk kedua kolom */
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 25px 30px;
+            flex-basis: 450px;
+            flex-grow: 1;
+            max-width: 500px;
+            box-sizing: border-box;
+            height: fit-content;
+        }
+
+        .card h2 {
+            color: #5a67d8;
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .card-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Kolom Kiri: Upload */
+        .upload-card form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2c5171;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #1987dc;
+        }
+
+        #file-name {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        input[type="submit"] {
+            padding: 12px 25px;
+            cursor: pointer;
+            background-color: #d86900;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #8e4400;
+        }
+
+        /* Kolom Kanan: Hasil Prediksi */
+        .result-card img {
+            width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .result-top {
+            margin-top: 25px;
+            padding: 15px;
+            border: 2px solid #5a67d8;
+            border-radius: 5px;
+            background-color: #f0f2ff;
+            text-align: center;
+        }
+
+        .result-top h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .result-top p {
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+
+        .result-top .label {
+            font-weight: bold;
+            color: #d9534f;
+            font-size: 1.2em;
+        }
+
+        /* **BARU**: Gaya untuk Kotak Rekomendasi */
+        .recommendation-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .recommendation-box h4 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+        }
+        .recommendation-box p {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* **BARU**: Gaya untuk Disclaimer Peringatan */
+        .disclaimer {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fffbeb; /* Warna kuning pucat */
+            border: 1px solid #fde086;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #5d4203;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 900px) {
+            .main-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-wrapper">
+
+        <div class="card upload-card">
+            <h2>Dermascan</h2>
+            <img src="https://cdn1-production-images-kly.akamaized.net/RTytjR7aBQvVk3cOKgP0lEaUA98=/1200x675/smart/filters:quality(75):strip_icc():format(jpeg)/kly-media-production/medias/5043275/original/020582900_1733817738-1733754397705_fungsi-termometer-laboratorium.jpg" alt="Upload Header" class="card-image">
+            <p>Upload gambar lesi kulit (JPG, JPEG, PNG) untuk diprediksi.</p>
+
+            <form method="post" enctype="multipart/form-data">
+
+                <input type="file" name="file" id="file-upload" accept="image/*" required>
+
+                <label for="file-upload" class="custom-file-upload">
+                    Unggah Gambar
+                </label>
+
+                <span id="file-name">Tidak ada file yang dipilih</span>
+
+                <input type="submit" value="Analisis Gambar">
+            </form>
+        </div>
+
+        {% if filename %}
+        <div class="card result-card">
+            <h2>Prediction Result</h2>
+
+            <h3>Gambar yang Dianalisis:</h3>
+            <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Uploaded Image">
+
+            <div class="result-top">
+                <h3>Hasil Prediksi Utama:</h3>
+                <p>Jenis Penyakit: <span class="label">{{ top_label }}</span></p>
+                <p>Tingkat Kepercayaan: <strong>{{ top_confidence }}%</strong></p>
+            </div>
+
+            <div class="recommendation-box">
+                <h4>Rekomendasi Perawatan & Penanggulangan</h4>
+                <p>{{ recommendation | safe }}</p>
+            </div>
+
+
+        </div>
+        {% endif %}
+
+    </div>
+
+    <script>
+        document.getElementById('file-upload').onchange = function () {
+            // Dapatkan nama file
+            var fileName = this.files[0] ? this.files[0].name : 'Tidak ada file yang dipilih';
+
+            // Perbarui teks pada elemen span
+            document.getElementById('file-name').textContent = fileName;
+        };
+    </script>
+
+</body>
+</html>
